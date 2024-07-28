@@ -5,18 +5,35 @@
 #include <arpa/inet.h>
 #include <time.h>
 
-#define PORT 5201
 
-const char* serv_ip = "10.0.0.4";
+char* serv_ip = "10.0.1.4";
+int PORT = 5201;
 
-int main() {
+
+int main(int argc, char* argv[]) {
+    int opt;
+    while ((opt = getopt(argc, argv, "s:p:")) != -1) {
+        switch (opt) {
+        case 's':
+            serv_ip = optarg;
+            break;
+        case 'p':
+            char* PORT_chars = optarg;
+            PORT = strtol(PORT_chars, NULL, 10);
+            break;
+        default:
+            break;
+        }
+    }
+
+
     const size_t DATA_SIZE = (size_t)1024 * 1024 * 1024 * 8;
 
     uint8_t* data = (uint8_t*)malloc(DATA_SIZE);
     uint8_t* warmup_data = (uint8_t*)malloc(DATA_SIZE / 4);
     double time_taken, xput, total_time = 0;
     memset(data, 'A', DATA_SIZE);
-    memset(warmup_data, 'A', DATA_SIZE / 4);
+    memset(warmup_data, 'B', DATA_SIZE / 4);
 
 
     int sock = 0;
@@ -45,11 +62,11 @@ int main() {
     }
 
     //Warm up
-    send(sock, warmup_data, DATA_SIZE / 4, MSG_WAITALL);
+    send(sock, warmup_data, DATA_SIZE / 4, MSG_DONTROUTE);
 
     while (total_sent < DATA_SIZE) {
         clock_gettime(CLOCK_MONOTONIC, &start);
-        bytes_sent = send(sock, data, DATA_SIZE, MSG_WAITALL);
+        bytes_sent = send(sock, data, DATA_SIZE, MSG_MORE);
         clock_gettime(CLOCK_MONOTONIC, &end);
         total_sent += bytes_sent;
         time_taken = (end.tv_sec - start.tv_sec) * 1e9;
