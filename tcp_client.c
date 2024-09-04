@@ -20,7 +20,7 @@ int main(int argc, char* argv[]) {
         case 'p':
             char* PORT_chars = optarg;
             PORT = strtol(PORT_chars, NULL, 10);
-            break;
+	    break;
         default:
             break;
         }

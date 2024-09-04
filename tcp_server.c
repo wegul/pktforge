@@ -53,7 +53,7 @@ int main() {
         perror("accept");
         exit(EXIT_FAILURE);
     }
-
+    printf("New connection\n");
     while (1) {
         if (recv(new_socket, buffer, BUFFER_SIZE, MSG_WAITALL) <= 0) {
             break;
