@@ -60,17 +60,6 @@ int main() {
         }
     }
 
-    // // Start measurement
-    // total_received = 0;
-    // bytes_received = 0;
-    // while (total_received < DATA_SIZE) {
-    //     bytes_received = recv(new_socket, buffer, BUFFER_SIZE, MSG_MORE);
-    //     if (bytes_received <= 0) {
-    //         break;
-    //     }
-    //     total_received += bytes_received;
-    // }
-
     printf("Finish all\n");
 
     close(new_socket);

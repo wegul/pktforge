@@ -20,7 +20,7 @@ int main(int argc, char* argv[]) {
         case 'p':
             char* PORT_chars = optarg;
             PORT = strtol(PORT_chars, NULL, 10);
-	    break;
+            break;
         default:
             break;
         }
@@ -66,7 +66,7 @@ int main(int argc, char* argv[]) {
 
     while (total_sent < DATA_SIZE) {
         clock_gettime(CLOCK_MONOTONIC, &start);
-        bytes_sent = send(sock, data, DATA_SIZE, MSG_MORE);
+        bytes_sent = send(sock, data, DATA_SIZE, 0);
         clock_gettime(CLOCK_MONOTONIC, &end);
         total_sent += bytes_sent;
         time_taken = (end.tv_sec - start.tv_sec) * 1e9;
