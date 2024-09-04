@@ -48,7 +48,6 @@ int main(int argc, char* argv[]) {
         printf("\n Socket creation error \n");
         return -1;
     }
-
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_port = htons(PORT);
 
@@ -58,11 +57,13 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
+    //Set send buf
+    setsockopt(sock, SOL_SOCKET, SO_SNDBUF, &DATA_SIZE, sizeof(DATA_SIZE));
+
     if (connect(sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0) {
         printf("\nConnection Failed \n");
         return -1;
     }
-
     //Warm up
     send(sock, warmup_data, DATA_SIZE / 4, 0);
 
