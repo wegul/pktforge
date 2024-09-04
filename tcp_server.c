@@ -7,7 +7,6 @@
 #include <sys/sendfile.h>
 
 #define PORT 8080
-#define ITERATION 1
 #define BUFFER_SIZE 1024 * 1024 * 128  // 128 MB
 
 
