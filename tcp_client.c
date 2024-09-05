@@ -5,7 +5,7 @@
 #include <arpa/inet.h>
 #include <time.h>
 
-#define ITERATION 100
+#define ITERATION 20
 #define EPOCH 10
 
 
@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    const size_t DATA_SIZE = (size_t)1024 * 1024 * 64;//64MB
+    const size_t DATA_SIZE = (size_t)1024 * 1024 * 32;//32MB
 
     uint8_t* data = (uint8_t*)malloc(DATA_SIZE);
     uint8_t* warmup_data = (uint8_t*)malloc(DATA_SIZE);
