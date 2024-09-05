@@ -5,8 +5,8 @@
 #include <arpa/inet.h>
 #include <time.h>
 
-#define ITERATION 20
-#define EPOCH 10
+#define ITERATION 60
+#define EPOCH 20
 
 
 char* serv_ip = "10.0.1.4";
