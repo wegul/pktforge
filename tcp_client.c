@@ -5,8 +5,9 @@
 #include <arpa/inet.h>
 #include <time.h>
 
-#define ITERATION 60
-#define EPOCH 20
+#define EPOCH 10
+#define FSIZE 1024 * 1024 * 512 //512MB
+
 
 
 char* serv_ip = "10.0.1.4";
@@ -15,6 +16,8 @@ int PORT = 5201;
 
 int main(int argc, char* argv[]) {
     int opt;
+    const size_t DATA_SIZE = (size_t)FSIZE;
+
     while ((opt = getopt(argc, argv, "s:p:")) != -1) {
         switch (opt) {
         case 's':
@@ -29,7 +32,6 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    const size_t DATA_SIZE = (size_t)1024 * 1024 * 32;//32MB
 
     uint8_t* data = (uint8_t*)malloc(DATA_SIZE);
     uint8_t* warmup_data = (uint8_t*)malloc(DATA_SIZE);
@@ -69,12 +71,10 @@ int main(int argc, char* argv[]) {
 
     int cur_epoch = 0;
     while (cur_epoch++ < EPOCH) {
-        bytes_sent = 0;time_taken = 0;
         clock_gettime(CLOCK_MONOTONIC, &start);
-        for (int i = 0; i < ITERATION; i++) {
-            bytes_sent += send(sock, data, DATA_SIZE, 0);
-        }
+        bytes_sent = send(sock, data, DATA_SIZE, 0);
         clock_gettime(CLOCK_MONOTONIC, &end);
+
         time_taken = (end.tv_sec - start.tv_sec) * 1e9;
         time_taken = (time_taken + (end.tv_nsec - start.tv_nsec)) * 1e-9;
 
@@ -84,10 +84,10 @@ int main(int argc, char* argv[]) {
         xput = (bytes_sent / (1024.0 * 1024.0 * 1024.0)) / time_taken;  // MB/s
         // printf("Total data sent: %ld MB\n", bytes_sent / (1024 * 1024));
         // printf("Time taken: %.6f seconds\n", time_taken);
-        printf("Xput: %.8f Gbps\n", xput * 8);
+        printf("In epoch <%d>, Xput= %.8f Gbps\n", cur_epoch, xput * 8);
     }
     xput = (total_sent / (1024.0 * 1024.0 * 1024.0)) / total_time;  // MB/s
-    printf("_______\nAvg Xput: %.8f Gbps\n", xput * 8);
+    printf("_______\nAvg Xput= %.8f Gbps\n", xput * 8);
 
 
     close(sock);

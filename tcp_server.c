@@ -55,10 +55,12 @@ int main() {
         perror("accept");
         exit(EXIT_FAILURE);
     }
-
-    printf("New connection\n");
+    // Convert IP addresses from binary to text form
+    char client_ip[INET_ADDRSTRLEN];
+    inet_ntop(AF_INET, &(address.sin_addr), client_ip, INET_ADDRSTRLEN);
+    printf("New connection from %s\n", client_ip);
     while (1) {
-        if (recv(new_socket, buffer, BUFFER_SIZE, MSG_WAITALL) <= 0) {
+        if (recv(new_socket, buffer, BUFFER_SIZE, 0) <= 0) {
             break;
         }
     }
