@@ -4,7 +4,6 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <time.h>
-#include <pthread.h>
 
 
 #define EPOCH 10
@@ -15,7 +14,10 @@
 char* serv_ip = "10.0.1.4";
 int PORT = 8080;
 const size_t DATA_SIZE = (size_t)FSIZE;
+const size_t SNDBUF_SIZE = 2 * DATA_SIZE;
 uint8_t* data;
+int cur_epoch = 0;
+
 
 int mp_connect() {
     int sock = 0;
@@ -36,7 +38,7 @@ int mp_connect() {
         return -1;
     }
     //Set send buf
-    setsockopt(sock, SOL_SOCKET, SO_SNDBUF, &DATA_SIZE, sizeof(DATA_SIZE));
+    setsockopt(sock, SOL_SOCKET, SO_SNDBUF, &SNDBUF_SIZE, sizeof(SNDBUF_SIZE));
 
     if (connect(sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0) {
         printf("\nConnection Failed \n");
@@ -50,36 +52,27 @@ int mp_connect() {
 
     return sock;
 }
-int mp_send(int sock) {
-    double time_taken, xput, total_time = 0;
-
+// Returns bytes sent
+int mp_send(int sock, int flag) {
+    double time_taken, xput;
 
     struct timespec start, end;
-    size_t bytes_sent = 0, total_sent = 0;
+    size_t bytes_sent = 0;
 
-    int cur_epoch = 0;
-    while (cur_epoch++ < EPOCH) {
-        clock_gettime(CLOCK_MONOTONIC, &start);
-        bytes_sent = send(sock, data, DATA_SIZE, 0);
-        clock_gettime(CLOCK_MONOTONIC, &end);
+    clock_gettime(CLOCK_MONOTONIC, &start);
+    bytes_sent = send(sock, data, DATA_SIZE, flag);
+    clock_gettime(CLOCK_MONOTONIC, &end);
 
-        time_taken = (end.tv_sec - start.tv_sec) * 1e9;
-        time_taken = (time_taken + (end.tv_nsec - start.tv_nsec)) * 1e-9;
+    time_taken = (end.tv_sec - start.tv_sec) * 1e9;
+    time_taken = (time_taken + (end.tv_nsec - start.tv_nsec)) * 1e-9;
 
-        total_sent += bytes_sent;
-        total_time += time_taken;
-
-        xput = (bytes_sent / (1024.0 * 1024.0 * 1024.0)) / time_taken;  // MB/s
-        // printf("Total data sent: %ld MB\n", bytes_sent / (1024 * 1024));
-        // printf("Time taken: %.6f seconds\n", time_taken);
-        printf("In epoch <%d>, Xput= %.8f Gbps\n", cur_epoch, xput * 8);
-    }
-    close(sock);
+    xput = (bytes_sent / (1024.0 * 1024.0 * 1024.0)) / time_taken;  // MB/s
+    // printf("Total data sent: %ld MB\n", bytes_sent / (1024 * 1024));
+    // printf("Time taken: %.6f seconds\n", time_taken);
+    // printf("In epoch <%d>, Xput= %.8f Gbps\n", cur_epoch, xput * 8);
+    return bytes_sent;
 }
-void* threadFunc(void* vargp) {
-    int* sock = vargp;
-    mp_send(*sock);
-}
+
 
 int main(int argc, char* argv[]) {
     int opt;
@@ -113,19 +106,24 @@ int main(int argc, char* argv[]) {
         sock_fd[i] = mp_connect();
     }
 
-    for (size_t i = 0; i < nr_conn; i++) {
-        pthread_create(&threads[i], NULL, threadFunc, &sock_fd[i]);
+    while (cur_epoch++ < EPOCH) {
+        int total_sent = 0;
+        double time_taken, xput;
+        struct timespec start, end;
+        clock_gettime(CLOCK_MONOTONIC, &start);
+        for (size_t i = 0; i < nr_conn - 1; i++) {
+            total_sent += mp_send(sock_fd[i], 0);//non-blocking
+        }
+        total_sent += mp_send(sock_fd[nr_conn - 1], 0);//blocking
+        clock_gettime(CLOCK_MONOTONIC, &end);
+        time_taken = (end.tv_sec - start.tv_sec) * 1e9;
+        time_taken = (time_taken + (end.tv_nsec - start.tv_nsec)) * 1e-9;
+        xput = (total_sent / (1024.0 * 1024.0 * 1024.0)) / time_taken;  // MB/s
+        printf("===In epoch <%d>, Average Xput= %.8f Gbps\n", cur_epoch, xput * 8);
     }
+
     for (size_t i = 0; i < nr_conn; i++) {
-        pthread_join(threads[i], NULL);
+        close(sock_fd[i]);
     }
-
-
-
-    // double xput = (total_sent / (1024.0 * 1024.0 * 1024.0)) / total_time;  // MB/s
-    // printf("_______\nAvg Xput= %.8f Gbps\n", xput * 8);
-
-
-
     return 0;
 }
