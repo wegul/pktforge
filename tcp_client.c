@@ -65,7 +65,7 @@ int main(int argc, char* argv[]) {
         return -1;
     }
     //Warm up
-    send(sock, data, DATA_SIZE / 2, 0);
+    // send(sock, data, DATA_SIZE / 2, 0);
 
     int cur_epoch = 0;
     while (cur_epoch++ < EPOCH) {

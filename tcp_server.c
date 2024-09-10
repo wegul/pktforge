@@ -77,7 +77,7 @@ int main() {
         time_taken = (end.tv_sec - start.tv_sec) * 1e9;
         time_taken = (time_taken + (end.tv_nsec - start.tv_nsec)) * 1e-9;
         xput = (bytes_recvd / (1024.0 * 1024.0 * 1024.0)) / time_taken;  // GB/s
-        printf("%.8f \n", xput * 8);
+        // printf("%.8f \n", xput * 8);
         total_time += time_taken;
         total_recvd += bytes_recvd;
         total_xput += xput;
