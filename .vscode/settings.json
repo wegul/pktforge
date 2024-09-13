@@ -3,7 +3,9 @@
         "time.h": "c",
         "unistd.h": "c",
         "pthread.h": "c",
-        "inet.h": "c"
+        "inet.h": "c",
+        "utils.h": "c",
+        "stdlib.h": "c"
     },
     "C_Cpp.default.compilerPath": "/usr/bin/gcc",
     "makefile.makefilePath": ""
