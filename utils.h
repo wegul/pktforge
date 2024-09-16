@@ -5,7 +5,7 @@
 #define NR_CONN 2
 
 struct Stat {
-    int bytes;
+    uint64_t bytes;
     struct timespec start;
     struct timespec end;
 };

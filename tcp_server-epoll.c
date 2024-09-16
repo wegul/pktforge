@@ -12,6 +12,7 @@
 
 
 uint8_t* rcvbuf;
+int epfd;
 
 int do_bind_server_sock() {
     const size_t RCVBUF_SIZE = BUFFER_SIZE;
@@ -94,41 +95,78 @@ void do_close(int sock) {
 }
 
 
+// Return a epoll_fd; 
+// param is sock to be listened
+// Note that this epoll should listen to both 'accept'(servfd) and 'recv'(clifd)
+void do_add_event(int sock) {
+    struct epoll_event ev;
+    ev.events = EPOLLIN;
+    ev.data.fd = sock;
+    epoll_ctl(epfd, EPOLL_CTL_ADD, sock, &ev);
+}
+void do_del_event(int sock) {
+    struct epoll_event ev;
+    ev.events = EPOLLIN;
+    ev.data.fd = sock;
+    epoll_ctl(epfd, EPOLL_CTL_DEL, sock, &ev);
+}
+
+
 
 int main(int argc, char* argv[]) {
-    int server_fd, client_fd = 0;
-    uint64_t total_bytes_recvd = 0;
-    double total_time_taken = 0.0;
+    int server_fd, client_fd, conn_fin = 0;
+    struct epoll_event events[MAX_CONN];// manages all connections
     struct Stat st;
     rcvbuf = (uint8_t*)malloc(BUFFER_SIZE);
+    epfd = epoll_create(1);
 
     server_fd = do_bind_server_sock();
     do_listen(server_fd);
-    while (1) {
-        client_fd = do_accept(server_fd);
+    do_add_event(server_fd);
 
-        while (1) {
-            st = do_recv(client_fd);
-            if (st.bytes <= 0) {
-                printf("Finished client socket <%d>\n", client_fd);
-                do_close(client_fd);
-                break;
+    uint64_t total_bytes_recvd = 0;
+    double total_time_taken = 0.0;
+
+    while (1) {
+        int nr_ready = epoll_wait(epfd, events, MAX_CONN, -1);
+        if (nr_ready < -1) {
+            perror("nready<0");
+            break;
+        }
+        for (size_t i = 0; i < nr_ready; i++) {
+            if (events[i].data.fd == server_fd)// This is accept event
+            {
+                client_fd = do_accept(server_fd);
+                do_add_event(client_fd);
             }
             else {
-                double xput = cal_xput(st);
-                // printf("Recv xput is %.8f\n", xput);
-                total_bytes_recvd += st.bytes;
-                total_time_taken += cal_time(st);
-                if (total_bytes_recvd > BUFFER_SIZE) {
-                    printf("_____\n Per 1 GB xput=%.8f\n", (total_bytes_recvd / (1024.0 * 1024.0 * 1024.0)) / total_time_taken * 8);
-                    total_bytes_recvd = 0;
-                    total_time_taken = 0;
+                client_fd = events[i].data.fd;
+                st = do_recv(client_fd);
+                if (st.bytes <= 0) {
+                    printf("Finished client socket <%d>\n", client_fd);
+                    do_close(client_fd);
+                    do_del_event(client_fd);
+                    conn_fin++;
+                }
+                else {
+                    double xput = cal_xput(st);
+                    // printf("Recv xput is %.8f\n", xput);
+                    total_bytes_recvd += st.bytes;
+                    total_time_taken += cal_time(st);
+                    if (total_bytes_recvd > BUFFER_SIZE) {
+                        printf("_____\n Per 1 GB xput=%.8f\n", (total_bytes_recvd / (1024.0 * 1024.0 * 1024.0)) / total_time_taken * 8);
+                        total_bytes_recvd = 0;
+                        total_time_taken = 0;
+                    }
                 }
             }
-
         }
-    }
+        // if (conn_fin >= NR_CONN) {
+        //     printf("_____\n %.8f\n", total_bytes_recvd / total_time_taken * 8);
+        //     conn_fin = 0;
+        // }
 
+    }
+    // printf("_____\n %.8f\n", total_bytes_recvd / total_time_taken * 8);
     do_close(server_fd);
 }
-

@@ -68,7 +68,9 @@ void do_transfer(int client_fd) {
         printf("Send error\n");
     }
 }
-void loop_transfer(int client_fd) {
+void* threadFunc(void* client_fd_ptr) {
+
+    int client_fd = *(int*)client_fd_ptr;
     int cur_epoch = EPOCH;
     while (cur_epoch--) {
         do_transfer(client_fd);
@@ -94,9 +96,23 @@ int main(int argc, char* argv[]) {
     data = (uint8_t*)malloc(DATA_SIZE);
     memset(data, 'A', DATA_SIZE);
 
-    int client_fd = do_conn();
-    loop_transfer(client_fd);
-    do_close(client_fd);
+
+    // int client_fd = do_conn();
+    int client_fds[NR_CONN] = { 0 };
+    pthread_t threads[NR_CONN];
+
+    for (size_t i = 0; i < NR_CONN; i++) {
+        client_fds[i] = do_conn();
+        pthread_create(&threads[i], NULL, threadFunc, &client_fds[i]);
+    }
+    for (size_t i = 0; i < NR_CONN; i++) {
+        pthread_join(threads[i], NULL);
+        do_close(client_fds[i]);
+    }
+
+    // printf("_____\n %.8f\n", total_xput / cnt);
+    // do_close(client_fd);
+
 
     return 0;
 }
