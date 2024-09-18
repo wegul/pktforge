@@ -1,6 +1,7 @@
-#define BUFFER_SIZE 1024 * 1024 * 1024  // 1 GB
+#define ONEGb 1024 * 1024 * 1024L
+#define BUFFER_SIZE ONEGb * 4
 #define FSIZE BUFFER_SIZE
-#define EPOCH 10
+#define EPOCH 500
 #define MAX_CONN 32
 #define NR_CONN 2
 
@@ -16,7 +17,7 @@ double cal_xput(struct Stat st) {
     struct timespec start = st.start, end = st.end;
     time_taken = (end.tv_sec - start.tv_sec) * 1e9;
     time_taken = (time_taken + (end.tv_nsec - start.tv_nsec)) * 1e-9;
-    xput = (bytes / (1024.0 * 1024.0 * 1024.0)) / time_taken;  // GB/s
+    xput = (bytes / ONEGb) / time_taken;  // GB/s
     return xput * 8;
 }
 

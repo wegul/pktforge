@@ -107,12 +107,12 @@ int main(int argc, char* argv[]) {
     while (1) {
         client_fd = do_accept(server_fd);
 
-        while (1) {
+        while (client_fd > 0) {
             st = do_recv(client_fd);
             if (st.bytes <= 0) {
                 printf("Finished client socket <%d>\n", client_fd);
                 do_close(client_fd);
-                break;
+                client_fd = -1;
             }
             else {
                 double xput = cal_xput(st);
@@ -120,7 +120,7 @@ int main(int argc, char* argv[]) {
                 total_bytes_recvd += st.bytes;
                 total_time_taken += cal_time(st);
                 if (total_bytes_recvd > BUFFER_SIZE) {
-                    printf("_____\n Per 1 GB xput=%.8f\n", (total_bytes_recvd / (1024.0 * 1024.0 * 1024.0)) / total_time_taken * 8);
+                    printf("_____\n Per 1 GB xput=%.8f\n", (total_bytes_recvd / ONEGb) / total_time_taken * 8);
                     total_bytes_recvd = 0;
                     total_time_taken = 0;
                 }
