@@ -76,7 +76,7 @@ int do_accept(int server_fd) {
 struct Stat do_recv(int client_fd) {
     struct timespec start, end;
 
-    int bytes_recvd = 0;
+    uint64_t bytes_recvd = 0;
     clock_gettime(CLOCK_MONOTONIC, &start);
     bytes_recvd = recv(client_fd, rcvbuf, BUFFER_SIZE, 0);
     clock_gettime(CLOCK_MONOTONIC, &end);

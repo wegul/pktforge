@@ -1,5 +1,5 @@
 #define ONEGb 1024 * 1024 * 1024L
-#define BUFFER_SIZE ONEGb * 4
+#define BUFFER_SIZE ONEGb * 2
 #define FSIZE BUFFER_SIZE
 #define EPOCH 500
 #define MAX_CONN 32

@@ -42,7 +42,7 @@ int do_conn() {
 
 struct Stat do_send(int client_fd) {
     struct timespec start, end;
-    int bytes_sent = 0;
+    uint64_t bytes_sent = 0;
     clock_gettime(CLOCK_MONOTONIC, &start);
     bytes_sent = send(client_fd, data, FSIZE, 0);
     clock_gettime(CLOCK_MONOTONIC, &end);
