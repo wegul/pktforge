@@ -48,7 +48,7 @@ struct Stat do_send(int client_fd) {
     struct timespec start, end;
     uint64_t bytes_sent = 0;
     clock_gettime(CLOCK_MONOTONIC, &start);
-    bytes_sent = write(client_fd, data, FSIZE);
+    bytes_sent = send(client_fd, data, FSIZE, 0);
     clock_gettime(CLOCK_MONOTONIC, &end);
 
     struct Stat st;

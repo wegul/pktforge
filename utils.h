@@ -1,5 +1,5 @@
 #define ONEGB (1024 * 1024 * 1024UL)
-#define BUFFER_SIZE ONEGB
+#define BUFFER_SIZE (64*1024*1024UL)
 #define FSIZE ONEGB // FileSize
 #define EPOCH 500
 #define MAX_CONN 32
