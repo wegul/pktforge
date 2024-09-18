@@ -14,7 +14,7 @@
 uint8_t* rcvbuf;
 
 int do_bind_server_sock() {
-    const size_t RCVBUF_SIZE = BUFFER_SIZE;
+    const size_t RCVBUF_SIZE = 2 * BUFFER_SIZE;
     struct sockaddr_in srv_addr;
     int server_fd;
     int opt = 1;
@@ -101,7 +101,6 @@ int main(int argc, char* argv[]) {
     double total_time_taken = 0.0;
     struct Stat st;
     rcvbuf = (uint8_t*)malloc(BUFFER_SIZE);
-
     server_fd = do_bind_server_sock();
     do_listen(server_fd);
     while (1) {
@@ -119,8 +118,8 @@ int main(int argc, char* argv[]) {
                 // printf("Recv xput is %.8f\n", xput);
                 total_bytes_recvd += st.bytes;
                 total_time_taken += cal_time(st);
-                if (total_bytes_recvd > BUFFER_SIZE) {
-                    printf("_____\n Per 1 GB xput=%.8f\n", (total_bytes_recvd / ONEGb) / total_time_taken * 8);
+                if (total_bytes_recvd >= BUFFER_SIZE) {
+                    printf("_____\n Per 2 GB xput=%.8f\n", (total_bytes_recvd / ONEGB) / total_time_taken * 8);
                     total_bytes_recvd = 0;
                     total_time_taken = 0;
                 }
