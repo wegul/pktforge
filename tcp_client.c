@@ -5,10 +5,14 @@
 #include <arpa/inet.h>
 #include <time.h>
 #include <pthread.h>
+#include <sys/sendfile.h>
 #include "utils.h"
+#include <fcntl.h>
+#include <sys/mman.h>
 
 int PORT = 8888;
-uint8_t* data;
+char* data;
+int payload_fd;
 char* serv_ip = "10.0.1.4";
 
 //return a client fd
@@ -44,7 +48,7 @@ struct Stat do_send(int client_fd) {
     struct timespec start, end;
     uint64_t bytes_sent = 0;
     clock_gettime(CLOCK_MONOTONIC, &start);
-    bytes_sent = send(client_fd, data, FSIZE, 0);
+    bytes_sent = write(client_fd, data, FSIZE);
     clock_gettime(CLOCK_MONOTONIC, &end);
 
     struct Stat st;
@@ -54,19 +58,18 @@ struct Stat do_send(int client_fd) {
 
     return st;
 }
-void do_close(int sock) {
-    close(sock);
-}
+
 
 void do_transfer(int client_fd) {
     struct Stat st = do_send(client_fd);
-    if (st.bytes > 0) {
-        double xput = cal_xput(st);
-        printf("Send xput is %.8f\n", xput);
-    }
-    else {
-        printf("Send error\n");
-    }
+    // if (st.bytes > 0) {
+    //     double xput = cal_xput(st);
+    //     printf("Send xput is %.8f\n", xput);
+    // }
+    // else {
+    //     perror("Send error\n");
+    //     exit(EXIT_FAILURE);
+    // }
 }
 void loop_transfer(int client_fd) {
     int cur_epoch = EPOCH;
@@ -74,9 +77,11 @@ void loop_transfer(int client_fd) {
         do_transfer(client_fd);
     }
 }
+void do_close(int sock) {
+    close(sock);
+}
 int main(int argc, char* argv[]) {
     int opt;
-    const size_t DATA_SIZE = (size_t)FSIZE;
 
     while ((opt = getopt(argc, argv, "s:p:")) != -1) {
         switch (opt) {
@@ -91,8 +96,14 @@ int main(int argc, char* argv[]) {
             break;
         }
     }
-    data = (uint8_t*)malloc(DATA_SIZE);
-    memset(data, 'A', DATA_SIZE);
+    payload_fd = open("./largefile.bin", O_RDONLY);
+    if (payload_fd < 0) {
+        perror("Failed to obtain file descriptor");
+        return -1;
+    }
+    data = (int8_t*)mmap(NULL, FSIZE, PROT_READ, MAP_PRIVATE, payload_fd, 0);
+    // data = (int8_t*)malloc(FSIZE);
+    // memset(data, 'A', FSIZE);
 
     int client_fd = do_conn();
     loop_transfer(client_fd);

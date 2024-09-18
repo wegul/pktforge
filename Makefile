@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-I -g -O2
+CFLAGS=-O3
 
 # Common dependencies
 DEPS = 
@@ -11,7 +11,8 @@ OBJ_SERV_EP = tcp_server-epoll.o
 OBJ_CLI_MP = tcp_client-mp.o
 
 # Default target
-all: server client server-ep client-mp
+all: server client
+#  server-ep client-mp
 
 # Compile rules for object files
 %.o: %.c $(DEPS)
