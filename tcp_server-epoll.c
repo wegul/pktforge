@@ -90,6 +90,7 @@ struct Stat do_recv(int client_fd) {
     return st;
 }
 
+
 void do_close(int sock) {
     close(sock);
 }
@@ -127,12 +128,16 @@ int main(int argc, char* argv[]) {
     uint64_t total_bytes_recvd = 0;
     double total_time_taken = 0.0;
 
+    struct timespec start, end;
+    clock_gettime(CLOCK_MONOTONIC, &start);
+
     while (1) {
         int nr_ready = epoll_wait(epfd, events, MAX_CONN, -1);
         if (nr_ready < -1) {
             perror("nready<0");
             break;
         }
+
         for (size_t i = 0; i < nr_ready; i++) {
             if (events[i].data.fd == server_fd)// This is accept event
             {
@@ -149,14 +154,15 @@ int main(int argc, char* argv[]) {
                     conn_fin++;
                 }
                 else {
-                    double xput = cal_xput(st);
-                    // printf("Recv xput is %.8f\n", xput);
                     total_bytes_recvd += st.bytes;
-                    total_time_taken += cal_time(st);
-                    if (total_bytes_recvd > BUFFER_SIZE) {
-                        printf("_____\n Per 1 GB xput=%.8f\n", (total_bytes_recvd / (1024.0 * 1024.0 * 1024.0)) / total_time_taken * 8);
+                    if (total_bytes_recvd >= ONEGB * 2) {
+                        st.start = start;
+                        total_time_taken = cal_timetaken(start, st.end);
+                        printf("bytes=%ld, timesec=%.2f\n", total_bytes_recvd / ONEGB, total_time_taken);
+                        printf("_____\n Per 2 GB xput=%.8f\n", (total_bytes_recvd / ONEGB) / total_time_taken * 8);
                         total_bytes_recvd = 0;
                         total_time_taken = 0;
+                        clock_gettime(CLOCK_MONOTONIC, &start);
                     }
                 }
             }

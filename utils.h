@@ -1,9 +1,10 @@
 #define ONEGB (1024 * 1024 * 1024UL)
 #define BUFFER_SIZE (64*1024*1024UL)
+
 #define FSIZE ONEGB // FileSize
 #define EPOCH 500
 #define MAX_CONN 32
-#define NR_CONN 2
+#define NR_CONN 4
 
 struct Stat {
     uint64_t bytes;
@@ -24,6 +25,13 @@ double cal_xput(struct Stat st) {
 double cal_time(struct Stat st) {
     double time_taken;
     struct timespec start = st.start, end = st.end;
+    time_taken = (end.tv_sec - start.tv_sec) * 1e9;
+    time_taken = (time_taken + (end.tv_nsec - start.tv_nsec)) * 1e-9;
+    return time_taken;
+}
+
+double cal_timetaken(struct timespec start, struct timespec end) {
+    double time_taken;
     time_taken = (end.tv_sec - start.tv_sec) * 1e9;
     time_taken = (time_taken + (end.tv_nsec - start.tv_nsec)) * 1e-9;
     return time_taken;

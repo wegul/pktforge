@@ -14,7 +14,7 @@ char* serv_ip = "10.0.1.4";
 //return a client fd
 int do_conn() {
     int client_fd = 0;
-    const size_t DATA_SIZE = (size_t)FSIZE * 2;
+    const size_t DATA_SIZE = (size_t)FSIZE;
     struct sockaddr_in serv_addr;
 
     if ((client_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {

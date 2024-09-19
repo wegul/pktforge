@@ -14,7 +14,7 @@
 uint8_t* rcvbuf;
 
 int do_bind_server_sock() {
-    const size_t RCVBUF_SIZE = BUFFER_SIZE * 2;
+    const size_t RCVBUF_SIZE = BUFFER_SIZE;
     struct sockaddr_in srv_addr;
     int server_fd;
     int opt = 1;
