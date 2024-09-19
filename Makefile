@@ -2,7 +2,7 @@ CC=gcc
 CFLAGS=-O3
 
 # Common dependencies
-DEPS = 
+DEPS = utils.h
 
 # Object files for each application
 OBJ_SERV = tcp_server.o 

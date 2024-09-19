@@ -1,10 +1,10 @@
 #define ONEGB (1024 * 1024 * 1024UL)
-#define BUFFER_SIZE (64*1024*1024UL)
+#define BUFFER_SIZE (ONEGB)
 
 #define FSIZE ONEGB // FileSize
-#define EPOCH 500
+#define EPOCH 9999
 #define MAX_CONN 32
-#define NR_CONN 4
+#define NR_CONN 2
 
 struct Stat {
     uint64_t bytes;

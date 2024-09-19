@@ -96,7 +96,7 @@ int main(int argc, char* argv[]) {
             break;
         }
     }
-    payload_fd = open("./largefile.bin", O_RDONLY);
+    payload_fd = open("./scripts/largefile.bin", O_RDONLY);
     if (payload_fd < 0) {
         perror("Failed to obtain file descriptor");
         return -1;
