@@ -55,7 +55,6 @@ struct Stat do_send(int client_fd) {
     uint64_t bytes_sent = 0;
     clock_gettime(CLOCK_MONOTONIC, &start);
     bytes_sent = write(client_fd, data, WND_SIZE);
-    // bytes_sent = write(client_fd, data, BUFFER_SIZE);
     clock_gettime(CLOCK_MONOTONIC, &end);
 
     struct Stat st;
@@ -111,7 +110,7 @@ int main(int argc, char* argv[]) {
     }
     // data = (int8_t*)mmap(NULL, WND_SIZE, PROT_READ, MAP_PRIVATE, payload_fd, 0);
     data = (int8_t*)malloc(WND_SIZE);
-    memset(data, 'A', WND_SIZE);
+    // memset(data, 'A', WND_SIZE);
 
     int client_fd = do_conn();
     loop_transfer(client_fd);

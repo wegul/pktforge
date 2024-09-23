@@ -1,7 +1,7 @@
 #define ONEGB (1024 * 1024 * 1024UL)
-#define WND_SIZE 256*1024
+#define WND_SIZE 1024*1024
 
-#define RCV_SIZE 8*256*1024
+#define RCV_SIZE ONEGB
 
 
 #define EPOCH 999999
