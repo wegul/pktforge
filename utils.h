@@ -1,6 +1,9 @@
 #define ONEGB (1024 * 1024 * 1024UL)
 #define WND_SIZE 256*1024
 
+#define RCV_SIZE 8*256*1024
+
+
 #define EPOCH 999999
 #define MAX_CONN 32
 #define NR_CONN 2

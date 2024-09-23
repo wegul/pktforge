@@ -14,7 +14,7 @@
 uint8_t* rcvbuf;
 
 int do_bind_server_sock() {
-    const size_t RCVBUF_SIZE = WND_SIZE;
+    const size_t RCVBUF_SIZE = RCV_SIZE;
     struct sockaddr_in srv_addr;
     int server_fd;
     int opt = 1;
@@ -78,7 +78,7 @@ struct Stat do_recv(int client_fd) {
 
     uint64_t bytes_recvd = 0;
     clock_gettime(CLOCK_MONOTONIC, &start);
-    bytes_recvd = read(client_fd, rcvbuf, WND_SIZE);
+    bytes_recvd = read(client_fd, rcvbuf, RCV_SIZE);
     clock_gettime(CLOCK_MONOTONIC, &end);
 
     struct Stat st;
@@ -99,7 +99,7 @@ int main(int argc, char* argv[]) {
     uint64_t total_bytes_recvd = 0;
     double total_time_taken = 0.0;
     struct Stat st;
-    rcvbuf = (uint8_t*)malloc(WND_SIZE);
+    rcvbuf = (uint8_t*)malloc(RCV_SIZE);
     server_fd = do_bind_server_sock();
     do_listen(server_fd);
     while (1) {
