@@ -20,7 +20,7 @@ uint64_t total_bytes_sent = 0;
 //return a client fd
 int do_conn() {
     int client_fd = 0;
-    const size_t BUF_SIZE = (size_t)ONEGB;
+    const size_t SND_BUF_SIZE = (size_t)WND_SIZE;
     struct sockaddr_in serv_addr;
 
     if ((client_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
@@ -37,7 +37,11 @@ int do_conn() {
     }
 
     //Set send buf
-    setsockopt(client_fd, SOL_SOCKET, SO_SNDBUF, &BUF_SIZE, sizeof(BUF_SIZE));
+    if (setsockopt(client_fd, SOL_SOCKET, SO_SNDBUF, &SND_BUF_SIZE, sizeof(SND_BUF_SIZE))) {
+        perror("setsockopt");
+        exit(EXIT_FAILURE);
+    }
+    // getsockopt(client_fd,SOL_SOCKET,SO_SNDBUF)
 
     if (connect(client_fd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0) {
         printf("\nConnection Failed \n");
@@ -50,12 +54,9 @@ struct Stat do_send(int client_fd) {
     struct timespec start, end;
     uint64_t bytes_sent = 0;
     clock_gettime(CLOCK_MONOTONIC, &start);
-    bytes_sent = write(client_fd, data, BUFFER_SIZE);
+    bytes_sent = write(client_fd, data, WND_SIZE);
     // bytes_sent = write(client_fd, data, BUFFER_SIZE);
     clock_gettime(CLOCK_MONOTONIC, &end);
-    if (bytes_sent > 0) {
-        total_bytes_sent += bytes_sent;
-    }
 
     struct Stat st;
     st.bytes = bytes_sent;
@@ -68,19 +69,20 @@ struct Stat do_send(int client_fd) {
 
 void do_transfer(int client_fd) {
     struct Stat st = do_send(client_fd);
-    // if (st.bytes > 0) {
-    //     double xput = cal_xput(st);
-    //     printf("Send xput is %.8f\n", xput);
-    // }
-    // else {
-    //     perror("Send error\n");
-    //     exit(EXIT_FAILURE);
-    // }
+    if (st.bytes > 0) {
+        double xput = cal_xput(st);
+        printf("Send xput is %.8f\n", xput);
+    }
+    else {
+        perror("Send error\n");
+        exit(EXIT_FAILURE);
+    }
 }
 void loop_transfer(int client_fd) {
     int cur_epoch = EPOCH;
     while (cur_epoch--) {
-        do_transfer(client_fd);
+        // do_transfer(client_fd);
+        do_send(client_fd);
     }
 }
 void do_close(int sock) {
@@ -107,9 +109,9 @@ int main(int argc, char* argv[]) {
         perror("Failed to obtain file descriptor");
         return -1;
     }
-    data = (int8_t*)mmap(NULL, BUFFER_SIZE, PROT_READ, MAP_PRIVATE, payload_fd, 0);
-    // data = (int8_t*)malloc(BUFFER_SIZE);
-    // memset(data, 'A', BUFFER_SIZE);
+    // data = (int8_t*)mmap(NULL, WND_SIZE, PROT_READ, MAP_PRIVATE, payload_fd, 0);
+    data = (int8_t*)malloc(WND_SIZE);
+    memset(data, 'A', WND_SIZE);
 
     int client_fd = do_conn();
     loop_transfer(client_fd);

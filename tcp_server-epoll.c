@@ -15,7 +15,7 @@ uint8_t* rcvbuf;
 int epfd;
 
 int do_bind_server_sock() {
-    const size_t RCVBUF_SIZE = BUFFER_SIZE;
+    const size_t RCVBUF_SIZE = WND_SIZE;
     struct sockaddr_in srv_addr;
     int server_fd;
     int opt = 1;
@@ -79,7 +79,7 @@ struct Stat do_recv(int client_fd) {
 
     int bytes_recvd = 0;
     clock_gettime(CLOCK_MONOTONIC, &start);
-    bytes_recvd = recv(client_fd, rcvbuf, BUFFER_SIZE, 0);
+    bytes_recvd = recv(client_fd, rcvbuf, WND_SIZE, 0);
     clock_gettime(CLOCK_MONOTONIC, &end);
 
     struct Stat st;
@@ -118,7 +118,7 @@ int main(int argc, char* argv[]) {
     int server_fd, client_fd, conn_fin = 0;
     struct epoll_event events[MAX_CONN];// manages all connections
     struct Stat st;
-    rcvbuf = (uint8_t*)malloc(BUFFER_SIZE);
+    rcvbuf = (uint8_t*)malloc(WND_SIZE);
     epfd = epoll_create(1);
 
     server_fd = do_bind_server_sock();

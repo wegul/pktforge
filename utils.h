@@ -1,5 +1,5 @@
 #define ONEGB (1024 * 1024 * 1024UL)
-#define BUFFER_SIZE 128*1024*1024
+#define WND_SIZE 256*1024
 
 #define EPOCH 999999
 #define MAX_CONN 32
