@@ -15,10 +15,12 @@ char* data;
 int payload_fd;
 char* serv_ip = "10.0.1.4";
 
+uint64_t total_bytes_sent = 0;
+
 //return a client fd
 int do_conn() {
     int client_fd = 0;
-    const size_t BUF_SIZE = (size_t)BUFFER_SIZE;
+    const size_t BUF_SIZE = (size_t)ONEGB;
     struct sockaddr_in serv_addr;
 
     if ((client_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
@@ -48,8 +50,12 @@ struct Stat do_send(int client_fd) {
     struct timespec start, end;
     uint64_t bytes_sent = 0;
     clock_gettime(CLOCK_MONOTONIC, &start);
-    bytes_sent = send(client_fd, data, FSIZE, 0);
+    bytes_sent = write(client_fd, data, BUFFER_SIZE);
+    // bytes_sent = write(client_fd, data, BUFFER_SIZE);
     clock_gettime(CLOCK_MONOTONIC, &end);
+    if (bytes_sent > 0) {
+        total_bytes_sent += bytes_sent;
+    }
 
     struct Stat st;
     st.bytes = bytes_sent;
@@ -101,9 +107,9 @@ int main(int argc, char* argv[]) {
         perror("Failed to obtain file descriptor");
         return -1;
     }
-    data = (int8_t*)mmap(NULL, FSIZE, PROT_READ, MAP_PRIVATE, payload_fd, 0);
-    // data = (int8_t*)malloc(FSIZE);
-    // memset(data, 'A', FSIZE);
+    data = (int8_t*)mmap(NULL, BUFFER_SIZE, PROT_READ, MAP_PRIVATE, payload_fd, 0);
+    // data = (int8_t*)malloc(BUFFER_SIZE);
+    // memset(data, 'A', BUFFER_SIZE);
 
     int client_fd = do_conn();
     loop_transfer(client_fd);

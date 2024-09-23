@@ -21,5 +21,5 @@ echo "${FLG_PATH}/stackcollapse-perf.pl ./data/out.perf > ./data/out.folded"
 ${FLG_PATH}/stackcollapse-perf.pl ./data/out.perf > ./data/out.folded
 
 # Generate svg
-echo "${FLG_PATH}/flamegraph.pl out.folded > ./data/${OUTNAME}.svg"
-${FLG_PATH}/flamegraph.pl out.folded > ./data/${OUTNAME}.svg
+echo "${FLG_PATH}/flamegraph.pl ./data/out.folded > ./data/${OUTNAME}.svg"
+${FLG_PATH}/flamegraph.pl ./data/out.folded > ./data/${OUTNAME}.svg

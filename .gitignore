@@ -163,12 +163,15 @@ cython_debug/
 
 *.folded
 *.perf
+*.data.old
+*.data
 *.svg
-*.md
+
+README*
+
 *.o
 *.txt
 server*
 client*
 *.bin
 tcp_client-ep.c
-README.md
