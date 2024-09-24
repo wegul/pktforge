@@ -9,11 +9,11 @@ OBJ_SERV = tcp_server.o
 OBJ_CLI = tcp_client.o 
 OBJ_SERV_EP = tcp_server-epoll.o
 OBJ_CLI_MP = tcp_client-mp.o
-OBJ_CLI_EP = tcp_client-ep.o
+OBJ_CLI_NB = tcp_client-nb.o
 
 
 # Default target
-all: server client
+all: server client server-ep client-mp client-nb
 #  server-ep client-mp
 
 # Compile rules for object files
@@ -33,7 +33,7 @@ server-ep: $(OBJ_SERV_EP)
 client-mp: $(OBJ_CLI_MP)
 	$(CC) -o $@ $^ $(CFLAGS)
 	
-client-ep: $(OBJ_CLI_EP)
+client-nb: $(OBJ_CLI_NB)
 	$(CC) -o $@ $^ $(CFLAGS)
 
 

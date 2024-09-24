@@ -79,7 +79,7 @@ struct Stat do_recv(int client_fd) {
 
     int bytes_recvd = 0;
     clock_gettime(CLOCK_MONOTONIC, &start);
-    bytes_recvd = recv(client_fd, rcvbuf, RCV_SIZE, 0);
+    bytes_recvd = recv(client_fd, rcvbuf, RCV_SIZE, MSG_DONTWAIT);
     clock_gettime(CLOCK_MONOTONIC, &end);
 
     struct Stat st;

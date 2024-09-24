@@ -48,6 +48,10 @@ int do_conn() {
         printf("\nConnection Failed \n");
         return -1;
     }
+
+    int flags = fcntl(client_fd, F_GETFL, 0);
+    fcntl(client_fd, F_SETFL, flags | O_NONBLOCK);
+
     return client_fd;
 }
 
@@ -66,24 +70,32 @@ struct Stat do_send(int client_fd) {
     return st;
 }
 
-
-void do_transfer(int client_fd) {
-    struct Stat st;
-    st = do_send(client_fd);
-    if (st.bytes > 0) {
-        double xput = cal_xput(st);
-        printf("Send xput is %.8f\n", xput);
-    }
-    else {
-        perror("Send error\n");
-        exit(EXIT_FAILURE);
+int do_nblk_transfer(int client_fd) {
+    uint64_t bytes_sent = 0;
+    while (1) {
+        bytes_sent = write(client_fd, data, WND_SIZE);
+        // if > 0 then can still send
+        if (bytes_sent < 0) {
+            // likely full, should break;
+            if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                return 1;
+            }
+            else {
+                perror("Send error\n");
+                exit(EXIT_FAILURE);
+                return 0;
+            }
+        }
     }
 }
+
 void loop_transfer(int client_fd) {
     int cur_epoch = EPOCH;
     while (cur_epoch > 0) {
-        do_send(client_fd);
-        cur_epoch--;
+        cur_epoch = cur_epoch - do_nblk_transfer(client_fd);//do_transfer will return 0(fail) or 1(succ);
+        // do_transfer(client_fd);
+        // do_send(client_fd);
+        //cur_epoch--;
     }
 }
 void do_close(int sock) {

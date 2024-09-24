@@ -1,5 +1,5 @@
 #define ONEGB (1024 * 1024 * 1024UL)
-#define WND_SIZE 1024*512
+#define WND_SIZE 512*1024
 
 #define RCV_SIZE ONEGB
 
