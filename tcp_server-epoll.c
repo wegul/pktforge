@@ -158,7 +158,6 @@ int main(int argc, char* argv[]) {
                     if (total_bytes_recvd >= ONEGB * 2) {
                         st.start = start;
                         total_time_taken = cal_timetaken(start, st.end);
-                        printf("bytes=%ld, timesec=%.2f\n", total_bytes_recvd / ONEGB, total_time_taken);
                         printf("_____\n Per 2 GB xput=%.8f\n", (total_bytes_recvd / ONEGB) / total_time_taken * 8);
                         total_bytes_recvd = 0;
                         total_time_taken = 0;
