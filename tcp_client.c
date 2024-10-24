@@ -55,7 +55,7 @@ struct Stat do_send(int client_fd) {
     struct timespec start, end;
     uint64_t bytes_sent = 0;
     clock_gettime(CLOCK_MONOTONIC, &start);
-    bytes_sent = write(client_fd, data, WND_SIZE);
+    bytes_sent += write(client_fd, data, ONEGB);
     clock_gettime(CLOCK_MONOTONIC, &end);
 
     struct Stat st;
@@ -82,7 +82,8 @@ void do_transfer(int client_fd) {
 void loop_transfer(int client_fd) {
     int cur_epoch = EPOCH;
     while (cur_epoch > 0) {
-        do_send(client_fd);
+        // do_send(client_fd);
+        do_transfer(client_fd);
         cur_epoch--;
     }
 }
@@ -110,7 +111,7 @@ int main(int argc, char* argv[]) {
         perror("Failed to obtain file descriptor");
         return -1;
     }
-    data = (int8_t*)mmap(NULL, WND_SIZE, PROT_READ, MAP_PRIVATE, payload_fd, 0);
+    data = (int8_t*)mmap(NULL, ONEGB, PROT_READ, MAP_PRIVATE, payload_fd, 0);
     // data = (int8_t*)malloc(WND_SIZE);
     // memset(data, 'A', WND_SIZE);
 
