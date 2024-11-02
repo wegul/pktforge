@@ -93,9 +93,9 @@ void do_close(int sock) {
 int main(int argc, char* argv[]) {
     int opt;
 
-    while ((opt = getopt(argc, argv, "s:p:")) != -1) {
+    while ((opt = getopt(argc, argv, "c:p:")) != -1) {
         switch (opt) {
-        case 's':
+        case 'c':
             serv_ip = optarg;
             break;
         case 'p':
